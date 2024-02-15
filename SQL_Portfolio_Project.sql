@@ -13,11 +13,6 @@ SELECT LOCATION,DATE,TOTAL_DEATHS,TOTAL_CASES,(TOTAL_DEATHS/TOTAL_CASES)*100 AS 
 FROM SQL_PROJECT1..CovidDeaths
 ORDER BY 2
 
-SELECT LOCATION,DATE,TOTAL_DEATHS,TOTAL_CASES,(TOTAL_DEATHS/TOTAL_CASES)*100 AS DeathPercentage
-FROM SQL_PROJECT1..CovidDeaths
-WHERE LOCATION = 'INDIA'
-ORDER BY 2
-
 --Percentage of population getting affected by Covid 
 SELECT LOCATION,DATE,TOTAL_CASES,population,(TOTAL_CASES/population)*100 AS CovidPercentage
 FROM SQL_PROJECT1..CovidDeaths
@@ -55,22 +50,14 @@ WHERE continent IS NULL
 GROUP BY DATE
 ORDER BY 1
 
---Vaccinations
-SELECT dea.DATE, dea.LOCATION, vac.NEW_VACCINATIONS, SUM(CAST(vac.NEW_VACCINATIONS AS int)) OVER (PARTITION BY dea.LOCATION ORDER BY dea.LOCATION) AS VaccinationLocation
-FROM SQL_PROJECT1..CovidDeaths dea
-Join SQL_PROJECT1..CovidVaccinations vac
-ON dea.Location = vac.Location and dea.Date = vac.Date
-WHERE dea.continent is not NULL
-ORDER BY dea.DATE, dea.location
-
-
-
+--Population Vaccinated
 SELECT dea.DATE, dea.LOCATION, dea.POPULATION ,vac.new_vaccinations, SUM(CAST(vac.NEW_VACCINATIONS AS int)) OVER (PARTITION BY dea.LOCATION ORDER BY dea.LOCATION, dea.DATE) AS VaccinationLocation
 FROM SQL_PROJECT1..CovidDeaths dea
 Join SQL_PROJECT1..CovidVaccinations vac
 ON dea.Location = vac.Location and dea.Date = vac.Date
 WHERE dea.continent is not NULL
-
+  
+--Creating Table for Rolling Number of Vaccinations
 DROP TABLE IF EXISTS RollingVaxPopulation
 CREATE TABLE RollingVaxPopulation
 ( DATE datetime,
@@ -86,6 +73,7 @@ Join SQL_PROJECT1..CovidVaccinations vac
 ON dea.Location = vac.Location and dea.Date = vac.Date
 WHERE dea.continent is not NULL
 
+  --Percent of Population Vaccinated
 SELECT *, (RollingVac/POPULATION)*100 AS PopulationVaccinated
 FROM RollingVaxPopulation
 
